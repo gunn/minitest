@@ -26,6 +26,14 @@ module MiniTest
 
     def expect(name, retval, args=[])
       @expected_calls[name] = { :retval => retval, :args => args }
+      
+      eigenclass = class << self; self; end
+      eigenclass.send :define_method, name do |*given_args|
+        raise ArgumentError unless args.size == given_args.size
+        @actual_calls[name] << { :retval => retval, :args => given_args }
+        retval
+      end
+      
       self
     end
 
@@ -42,14 +50,6 @@ module MiniTest
           @actual_calls.has_key? name and @actual_calls[name].include?(expected)
       end
       true
-    end
-
-    def method_missing(sym, *args) # :nodoc:
-      raise NoMethodError unless @expected_calls.has_key?(sym)
-      raise ArgumentError unless @expected_calls[sym][:args].size == args.size
-      retval = @expected_calls[sym][:retval]
-      @actual_calls[sym] << { :retval => retval, :args => args }
-      retval
     end
 
     alias :original_respond_to? :respond_to?

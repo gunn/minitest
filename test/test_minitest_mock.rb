@@ -97,6 +97,17 @@ class TestMiniTestMock < MiniTest::Unit::TestCase
 
     assert !MiniTest::Mock.new.respond_to?(:foo)
   end
+  
+  def test_can_mock_to_s
+    @mock.foo
+    @mock.meaning_of_life
+    
+    @mock.expect(:to_s, "Your mock.")
+    @mock.expect(:id, 33)
+    
+    assert_equal "Your mock.", @mock.to_s
+    assert_equal 33, @mock.id
+  end
 
   def util_verify_bad
     assert_raises MockExpectationError do
